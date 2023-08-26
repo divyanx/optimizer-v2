@@ -126,7 +126,7 @@ class ExecParams:
             params = {}
 
         refiner_params = {"ngen": 100, "mu": 120, "cxpb": 0.5, "max_tries": 10, "elite": 0.1,
-                          "processes": 8}
+                          "processes": 1}
 
         self.grid_type = params.get('grid_type', '002')
         self.seeder_type = params.get('seeder_type', 'directional_seeder')
@@ -172,6 +172,9 @@ class Optimizer:
         setup = reader.get_json_from_file(setup_file_name,
                                           reader.DEFAULT_SPECIFICATION_INPUT_FOLDER)
 
+        print("lot", lot)  # lot is the envelope
+        print("setup", setup) # setup is the specification
+
         return self.run(lot, setup, params, local_context)
 
     @staticmethod
@@ -209,8 +212,10 @@ class Optimizer:
 
         # OPT-119: If we don't have a local_context, we create one
         assert local_context, "Local context is required"
-
+        print("local_context", local_context)
         params = ExecParams(params_dict)
+
+        print("params", params)
 
         # output dir
         if local_context is not None and local_context.output_dir:
@@ -229,7 +234,7 @@ class Optimizer:
         plan = reader.create_plan_from_data(lot)
         elapsed_times["reader"] = time.process_time() - t0_reader
         logging.info("Lot read in %f", elapsed_times["reader"])
-
+        print("plan", plan)
         # reading setup
         logging.info("Read setup")
         t0_setup = time.process_time()
@@ -304,6 +309,7 @@ class Optimizer:
         elapsed_times["corridor"] = time.process_time() - t0_corridor
         logging.info("Corridor achieved in %f", elapsed_times["corridor"])
 
+        print("Line 312 ##--##")
         # refiner
         t0_refiner = time.process_time()
         if params.do_refiner:
@@ -404,17 +410,19 @@ if __name__ == '__main__':
         logging.getLogger().setLevel(logging.INFO)
         executor = Optimizer()
         response = executor.run_from_file_names(
-            "045.json",
-            "045_setup0.json",
+            "001.json",
+            "001_setup0.json",
             {
                 "grid_type": "002",
                 "seeder_type": "directional_seeder",
                 "do_plot": True,
                 "do_corridor": True,
                 "do_refiner": True,
-                "max_nb_solutions": 3,
-                "do_door": False,
-                "do_final_scoring": True
+                "max_nb_solutions": 16,
+                "do_door": True,
+                "do_final_scoring": True,
+                "save_ll_bp": True,
+
             },
             local_context=LocalContext()
         )

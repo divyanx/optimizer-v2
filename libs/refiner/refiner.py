@@ -38,7 +38,7 @@ from libs.refiner import (
     space_nsga,
     population,
     support,
-    selection
+    selection,
 )
 
 
@@ -48,14 +48,16 @@ if TYPE_CHECKING:
     from libs.space_planner.solution import Solution
 
 # The type of an algorithm function
-algorithmFunc = Callable[['core.Toolbox', Plan, dict, Optional['support.HallOfFame']],
-                         List['core.Individual']]
+algorithmFunc = Callable[
+    ["core.Toolbox", Plan, dict, Optional["support.HallOfFame"]],
+    List["core.Individual"],
+]
 
 # setting a seed for debugging
 random.seed(0)
 
 
-def merge_circulation(ind: 'Individual') -> None:
+def merge_circulation(ind: "Individual") -> None:
     """
     Checks the number of circulation in an individual and merges them to limit their numbers
     :param ind:
@@ -63,10 +65,12 @@ def merge_circulation(ind: 'Individual') -> None:
     """
     circulations = list(ind.get_spaces("circulation"))
     while len(circulations) > 2:
-        adjacency_ratios = [(c.adjacency_to(other_c) / other_c.perimeter, c, other_c)
-                            for c in circulations
-                            for other_c in circulations
-                            if c is not other_c]
+        adjacency_ratios = [
+            (c.adjacency_to(other_c) / other_c.perimeter, c, other_c)
+            for c in circulations
+            for other_c in circulations
+            if c is not other_c
+        ]
         _, c, other_c = max(adjacency_ratios, key=lambda t: t[0])
         c.merge(other_c)
         circulations.remove(other_c)
@@ -74,7 +78,7 @@ def merge_circulation(ind: 'Individual') -> None:
     return
 
 
-def merge_adjacent_circulation(ind: 'Individual') -> None:
+def merge_adjacent_circulation(ind: "Individual") -> None:
     """
     Merges two adjacent corridors
     :param ind:
@@ -96,7 +100,7 @@ def merge_adjacent_circulation(ind: 'Individual') -> None:
                 break
 
 
-def merge_circulation_living(ind: 'Individual') -> None:
+def merge_circulation_living(ind: "Individual") -> None:
     """
     Merges a circulation space with the living or the livingKitchen if
     their adjacency length is superior to a maximum length
@@ -120,7 +124,7 @@ def merge_circulation_living(ind: 'Individual') -> None:
             break
 
 
-def merge_circulation_entrance(ind: 'Individual') -> None:
+def merge_circulation_entrance(ind: "Individual") -> None:
     """
     Merges a circulation space with the entrance if
     their adjacency length is superior a certain ratio of the circulation perimeter or
@@ -155,15 +159,15 @@ class Refiner:
     • the algorithm function that will be applied to the plan
     """
 
-    def __init__(self,
-                 fc_toolbox: Callable[['Solution', dict], 'core.Toolbox'],
-                 algorithm: algorithmFunc):
+    def __init__(
+        self,
+        fc_toolbox: Callable[["Solution", dict], "core.Toolbox"],
+        algorithm: algorithmFunc,
+    ):
         self._toolbox_factory = fc_toolbox
         self._algorithm = algorithm
 
-    def apply_to(self,
-                 solution: 'Solution',
-                 params: dict) -> 'Solution':
+    def apply_to(self, solution: "Solution", params: dict) -> "Solution":
         """
         Applies the refiner to the plan and returns the result.
         :param solution:
@@ -179,14 +183,16 @@ class Refiner:
         merge_circulation_entrance(output)
         merge_adjacent_circulation(output)
         solution.spec.plan = output
-        solution.space_item = {output.get_space_from_id(i): item
-                               for i, item in output.fitness.cache["space_to_item"].items()
-                               if output.get_space_from_id(i)}
+        solution.space_item = {
+            output.get_space_from_id(i): item
+            for i, item in output.fitness.cache["space_to_item"].items()
+            if output.get_space_from_id(i)
+        }
         return solution
 
-    def run(self,
-            solution: 'Solution',
-            params: dict) -> Union[List['core.Individual'], 'support.HallOfFame']:
+    def run(
+        self, solution: "Solution", params: dict
+    ) -> Union[List["core.Individual"], "support.HallOfFame"]:
         """
         Runs the algorithm and returns the results
         :param solution:
@@ -196,8 +202,10 @@ class Refiner:
 
         processes = params.get("processes", 1)
         hof = params.get("hof", 0)
-        _hof = support.HallOfFame(hof, lambda a, b: a.is_similar(b)) if hof > 0 else None
-        chunk_size = math.ceil(params["mu"]/processes)
+        _hof = (
+            support.HallOfFame(hof, lambda a, b: a.is_similar(b)) if hof > 0 else None
+        )
+        chunk_size = math.ceil(params["mu"] / processes)
 
         merge_circulation(solution.spec.plan)
 
@@ -217,8 +225,9 @@ class Refiner:
             pool = multiprocessing.Pool(processes)
             map_func = pool.imap
         else:
+
             def map_func(f, it, _):
-                """ simple map function"""
+                """simple map function"""
                 return map(f, it)
 
         toolbox.register("map", map_func)
@@ -240,11 +249,11 @@ class Refiner:
 
 # Toolbox factories
 
+
 # Algorithm functions
-def mate_and_mutate(mate_func,
-                    mutate_func,
-                    params: dict,
-                    couple: Tuple['Individual', 'Individual']) -> Tuple['Individual', 'Individual']:
+def mate_and_mutate(
+    mate_func, mutate_func, params: dict, couple: Tuple["Individual", "Individual"]
+) -> Tuple["Individual", "Individual"]:
     """
     Specific function for nsga algorithm
     :param mate_func:
@@ -268,14 +277,20 @@ def mate_and_mutate(mate_func,
     return new_ind_1, new_ind_2
 
 
-def fc_nsga_toolbox(solution: 'Solution', params: dict) -> 'core.Toolbox':
+def fc_nsga_toolbox(solution: "Solution", params: dict) -> "core.Toolbox":
     """
     Returns a toolbox
     :param solution:
     :param params: The params of the algorithm
     :return: a configured toolbox
     """
-    weights = (-20.0, -1.0, -50.0, -1.0, -50000.0,)
+    weights = (
+        -20.0,
+        -1.0,
+        -50.0,
+        -1.0,
+        -50000.0,
+    )
     # a tuple containing the weights of the fitness
     cxpb = params["cxpb"]  # the probability to mate a given couple of individuals
 
@@ -294,30 +309,53 @@ def fc_nsga_toolbox(solution: 'Solution', params: dict) -> 'core.Toolbox':
     ]
     toolbox.register("evaluate", evaluation.compose, scores_fc, solution.spec)
 
-    mutations = ((mutation.add_face, {mutation.Case.DEFAULT: 0.1,
-                                      mutation.Case.SMALL: 0.3,
-                                      mutation.Case.BIG: 0.1}),
-                 (mutation.remove_face, {mutation.Case.DEFAULT: 0.1,
-                                         mutation.Case.SMALL: 0.1,
-                                         mutation.Case.BIG: 0.3}),
-                 (mutation.add_aligned_faces, {mutation.Case.DEFAULT: 0.4,
-                                               mutation.Case.SMALL: 0.5,
-                                               mutation.Case.BIG: 0.1}),
-                 (mutation.remove_aligned_faces, {mutation.Case.DEFAULT: 0.4,
-                                                  mutation.Case.SMALL: 0.1,
-                                                  mutation.Case.BIG: 0.5}))
+    mutations = (
+        (
+            mutation.add_face,
+            {
+                mutation.Case.DEFAULT: 0.1,
+                mutation.Case.SMALL: 0.3,
+                mutation.Case.BIG: 0.1,
+            },
+        ),
+        (
+            mutation.remove_face,
+            {
+                mutation.Case.DEFAULT: 0.1,
+                mutation.Case.SMALL: 0.1,
+                mutation.Case.BIG: 0.3,
+            },
+        ),
+        (
+            mutation.add_aligned_faces,
+            {
+                mutation.Case.DEFAULT: 0.4,
+                mutation.Case.SMALL: 0.5,
+                mutation.Case.BIG: 0.1,
+            },
+        ),
+        (
+            mutation.remove_aligned_faces,
+            {
+                mutation.Case.DEFAULT: 0.4,
+                mutation.Case.SMALL: 0.1,
+                mutation.Case.BIG: 0.5,
+            },
+        ),
+    )
 
     toolbox.register("mutate", mutation.composite, mutations)
     toolbox.register("mate", crossover.best_spaces)
-    toolbox.register("mate_and_mutate", mate_and_mutate, toolbox.mate, toolbox.mutate,
-                     {"cxpb": cxpb})
+    toolbox.register(
+        "mate_and_mutate", mate_and_mutate, toolbox.mate, toolbox.mutate, {"cxpb": cxpb}
+    )
     toolbox.register("select", nsga.select_nsga)
     toolbox.register("populate", population.fc_mutate(toolbox.mutate))
 
     return toolbox
 
 
-def fc_space_nsga_toolbox(solution: 'Solution', params: dict) -> 'core.Toolbox':
+def fc_space_nsga_toolbox(solution: "Solution", params: dict) -> "core.Toolbox":
     """
     Returns a toolbox for the space nsga algorithm
     :param solution:
@@ -330,7 +368,7 @@ def fc_space_nsga_toolbox(solution: 'Solution', params: dict) -> 'core.Toolbox':
         (evaluation.score_width_depth_ratio, -500.0),
         (evaluation.score_bounding_box, -1.0),
         (evaluation.score_connectivity, -50000.0),
-        (evaluation.score_window_area_ratio, -10.)
+        (evaluation.score_window_area_ratio, -10.0),
     ]
 
     scores_fc, weights = list(zip(*scores))
@@ -343,31 +381,58 @@ def fc_space_nsga_toolbox(solution: 'Solution', params: dict) -> 'core.Toolbox':
     toolbox.configure("individual", "customIndividual", toolbox.fitness)
     toolbox.register("evaluate", evaluation.compose, scores_fc, solution.spec)
 
-    mutations = ((mutation.add_face, {mutation.Case.DEFAULT: 0.1,
-                                      mutation.Case.SMALL: 0.3,
-                                      mutation.Case.BIG: 0.1}),
-                 (mutation.remove_face, {mutation.Case.DEFAULT: 0.1,
-                                         mutation.Case.SMALL: 0.1,
-                                         mutation.Case.BIG: 0.3}),
-                 (mutation.add_aligned_faces, {mutation.Case.DEFAULT: 0.4,
-                                               mutation.Case.SMALL: 0.5,
-                                               mutation.Case.BIG: 0.1}),
-                 (mutation.remove_aligned_faces, {mutation.Case.DEFAULT: 0.4,
-                                                  mutation.Case.SMALL: 0.1,
-                                                  mutation.Case.BIG: 0.5}))
+    mutations = (
+        (
+            mutation.add_face,
+            {
+                mutation.Case.DEFAULT: 0.1,
+                mutation.Case.SMALL: 0.3,
+                mutation.Case.BIG: 0.1,
+            },
+        ),
+        (
+            mutation.remove_face,
+            {
+                mutation.Case.DEFAULT: 0.1,
+                mutation.Case.SMALL: 0.1,
+                mutation.Case.BIG: 0.3,
+            },
+        ),
+        (
+            mutation.add_aligned_faces,
+            {
+                mutation.Case.DEFAULT: 0.4,
+                mutation.Case.SMALL: 0.5,
+                mutation.Case.BIG: 0.1,
+            },
+        ),
+        (
+            mutation.remove_aligned_faces,
+            {
+                mutation.Case.DEFAULT: 0.4,
+                mutation.Case.SMALL: 0.1,
+                mutation.Case.BIG: 0.5,
+            },
+        ),
+    )
 
     toolbox.register("mutate", mutation.composite, mutations)
     toolbox.register("mate", crossover.best_spaces)
-    toolbox.register("mate_and_mutate", mate_and_mutate, toolbox.mate, toolbox.mutate,
-                     {"cxpb": cxpb})
-    toolbox.register("elite_select", selection.elite_select, toolbox.mutate, params["elite"])
+    toolbox.register(
+        "mate_and_mutate", mate_and_mutate, toolbox.mate, toolbox.mutate, {"cxpb": cxpb}
+    )
+    toolbox.register(
+        "elite_select", selection.elite_select, toolbox.mutate, params["elite"]
+    )
     toolbox.register("select", space_nsga.select_nsga)
     toolbox.register("populate", population.fc_mutate(toolbox.mutate))
 
     return toolbox
 
 
-def fc_no_connectivity_nsga_toolbox(solution: 'Solution', params: dict) -> 'core.Toolbox':
+def fc_no_connectivity_nsga_toolbox(
+    solution: "Solution", params: dict
+) -> "core.Toolbox":
     """
     Returns a toolbox for the space nsga algorithm
     :param solution:
@@ -379,7 +444,7 @@ def fc_no_connectivity_nsga_toolbox(solution: 'Solution', params: dict) -> 'core
         (evaluation.score_area, -8.0),
         (evaluation.score_width_depth_ratio, -500.0),
         (evaluation.score_bounding_box, -1.0),
-        (evaluation.score_window_area_ratio, -10.)
+        (evaluation.score_window_area_ratio, -10.0),
     ]
 
     scores_fc, weights = list(zip(*scores))
@@ -392,34 +457,61 @@ def fc_no_connectivity_nsga_toolbox(solution: 'Solution', params: dict) -> 'core
     toolbox.configure("individual", "customIndividualNoConnectivity", toolbox.fitness)
     toolbox.register("evaluate", evaluation.compose, scores_fc, solution.spec)
 
-    mutations = ((mutation.add_face, {mutation.Case.DEFAULT: 0.1,
-                                      mutation.Case.SMALL: 0.3,
-                                      mutation.Case.BIG: 0.1}),
-                 (mutation.remove_face, {mutation.Case.DEFAULT: 0.1,
-                                         mutation.Case.SMALL: 0.1,
-                                         mutation.Case.BIG: 0.3}),
-                 (mutation.add_aligned_faces, {mutation.Case.DEFAULT: 0.4,
-                                               mutation.Case.SMALL: 0.5,
-                                               mutation.Case.BIG: 0.1}),
-                 (mutation.remove_aligned_faces, {mutation.Case.DEFAULT: 0.4,
-                                                  mutation.Case.SMALL: 0.1,
-                                                  mutation.Case.BIG: 0.5}))
+    mutations = (
+        (
+            mutation.add_face,
+            {
+                mutation.Case.DEFAULT: 0.1,
+                mutation.Case.SMALL: 0.3,
+                mutation.Case.BIG: 0.1,
+            },
+        ),
+        (
+            mutation.remove_face,
+            {
+                mutation.Case.DEFAULT: 0.1,
+                mutation.Case.SMALL: 0.1,
+                mutation.Case.BIG: 0.3,
+            },
+        ),
+        (
+            mutation.add_aligned_faces,
+            {
+                mutation.Case.DEFAULT: 0.4,
+                mutation.Case.SMALL: 0.5,
+                mutation.Case.BIG: 0.1,
+            },
+        ),
+        (
+            mutation.remove_aligned_faces,
+            {
+                mutation.Case.DEFAULT: 0.4,
+                mutation.Case.SMALL: 0.1,
+                mutation.Case.BIG: 0.5,
+            },
+        ),
+    )
 
     toolbox.register("mutate", mutation.composite, mutations)
     toolbox.register("mate", crossover.best_spaces)
-    toolbox.register("mate_and_mutate", mate_and_mutate, toolbox.mate, toolbox.mutate,
-                     {"cxpb": cxpb})
-    toolbox.register("elite_select", selection.elite_select, toolbox.mutate, params["elite"])
+    toolbox.register(
+        "mate_and_mutate", mate_and_mutate, toolbox.mate, toolbox.mutate, {"cxpb": cxpb}
+    )
+    toolbox.register(
+        "elite_select", selection.elite_select, toolbox.mutate, params["elite"]
+    )
     toolbox.register("select", space_nsga.select_nsga)
     toolbox.register("populate", population.fc_mutate(toolbox.mutate))
 
     return toolbox
 
 
-def nsga_ga(toolbox: 'core.Toolbox',
-            initial_ind: 'core.Individual',
-            params: dict,
-            hof: Optional['support.HallOfFame']) -> List['core.Individual']:
+def nsga_ga(
+    toolbox: "core.Toolbox",
+    initial_ind: "core.Individual",
+    params: dict,
+    hof: Optional["support.HallOfFame"],
+) -> List["core.Individual"]:
     """
     A simple implementation of a genetic algorithm.
     :param toolbox: a refiner toolbox
@@ -449,8 +541,13 @@ def nsga_ga(toolbox: 'core.Toolbox',
         offspring = [toolbox.clone(ind) for ind in offspring]
 
         # note : list is needed because map lazy evaluates
-        modified = list(toolbox.map(toolbox.mate_and_mutate, zip(offspring[::2], offspring[1::2]),
-                                    math.ceil(chunk_size/2)))
+        modified = list(
+            toolbox.map(
+                toolbox.mate_and_mutate,
+                zip(offspring[::2], offspring[1::2]),
+                math.ceil(chunk_size / 2),
+            )
+        )
         offspring = [i for t in modified for i in t]
 
         # Evaluate the individuals with an invalid fitness
@@ -458,7 +555,11 @@ def nsga_ga(toolbox: 'core.Toolbox',
 
         # best score
         best_ind = max(offspring, key=lambda i: i.fitness.wvalue)
-        logging.info("Best : {:.2f} - {}".format(best_ind.fitness.wvalue, best_ind.fitness.values))
+        logging.info(
+            "Best : {:.2f} - {}".format(
+                best_ind.fitness.wvalue, best_ind.fitness.values
+            )
+        )
 
         # Select the next generation population
         pop = toolbox.select(pop + offspring, mu)
@@ -470,10 +571,12 @@ def nsga_ga(toolbox: 'core.Toolbox',
     return pop
 
 
-def space_nsga_ga(toolbox: 'core.Toolbox',
-                  initial_ind: 'core.Individual',
-                  params: dict,
-                  hof: Optional['support.HallOfFame']) -> List['core.Individual']:
+def space_nsga_ga(
+    toolbox: "core.Toolbox",
+    initial_ind: "core.Individual",
+    params: dict,
+    hof: Optional["support.HallOfFame"],
+) -> List["core.Individual"]:
     """
     A simple implementation of a genetic algorithm. We try to select individuals according to the
     pareto fronts of the population for each space fitness value. The idea is to select the
@@ -509,8 +612,13 @@ def space_nsga_ga(toolbox: 'core.Toolbox',
         offspring = [toolbox.clone(ind) for ind in offspring]
 
         # note : list is needed because map lazy evaluates
-        modified = list(toolbox.map(toolbox.mate_and_mutate, zip(offspring[::2], offspring[1::2]),
-                        math.ceil(chunk_size/2)))
+        modified = list(
+            toolbox.map(
+                toolbox.mate_and_mutate,
+                zip(offspring[::2], offspring[1::2]),
+                math.ceil(chunk_size / 2),
+            )
+        )
         offspring = [i for t in modified for i in t]
         total_pop = pop + offspring
 
@@ -533,8 +641,11 @@ def space_nsga_ga(toolbox: 'core.Toolbox',
         if hof is not None:
             hof.update(pop, value=True)
 
-        logging.info("Best x{}: {:.2f} - {}".format(no_improvement_count, best_ind.fitness.wvalue,
-                                                    best_ind.fitness.values))
+        logging.info(
+            "Best x{}: {:.2f} - {}".format(
+                no_improvement_count, best_ind.fitness.wvalue, best_ind.fitness.values
+            )
+        )
 
         # if we do not improve more than `max_tries times in a row we estimate we have reached t`
         # he global min and we can stop.
@@ -547,10 +658,12 @@ def space_nsga_ga(toolbox: 'core.Toolbox',
     return pop
 
 
-def naive_ga(toolbox: 'core.Toolbox',
-             initial_ind: 'core.Individual',
-             params: dict,
-             hof: Optional['support.HallOfFame']) -> List['core.Individual']:
+def naive_ga(
+    toolbox: "core.Toolbox",
+    initial_ind: "core.Individual",
+    params: dict,
+    hof: Optional["support.HallOfFame"],
+) -> List["core.Individual"]:
     """
     A simple implementation of a genetic algorithm.
     :param toolbox: a refiner toolbox
@@ -565,8 +678,11 @@ def naive_ga(toolbox: 'core.Toolbox',
     chunk_size = math.ceil(mu / params["processes"])
     initial_ind.all_spaces_modified()  # set all spaces as modified for first evaluation
     initial_ind.fitness.sp_values = toolbox.evaluate(initial_ind)
-    logging.info("Initial : {:.2f} - {}".format(initial_ind.fitness.wvalue,
-                                                initial_ind.fitness.values))
+    logging.info(
+        "Initial : {:.2f} - {}".format(
+            initial_ind.fitness.wvalue, initial_ind.fitness.values
+        )
+    )
     pop = toolbox.populate(initial_ind, mu)
     toolbox.evaluate_pop(toolbox.map, toolbox.evaluate, pop, chunk_size)
 
@@ -578,8 +694,13 @@ def naive_ga(toolbox: 'core.Toolbox',
         random.shuffle(offspring)
 
         # note : list is needed because map lazy evaluates
-        modified = list(toolbox.map(toolbox.mate_and_mutate, zip(offspring[::2], offspring[1::2]),
-                                    math.ceil(chunk_size/2)))
+        modified = list(
+            toolbox.map(
+                toolbox.mate_and_mutate,
+                zip(offspring[::2], offspring[1::2]),
+                math.ceil(chunk_size / 2),
+            )
+        )
         offspring = [i for t in modified for i in t]
 
         # Evaluate the individuals with an invalid fitness
@@ -587,7 +708,11 @@ def naive_ga(toolbox: 'core.Toolbox',
 
         # best score
         best_ind = max(offspring, key=lambda i: i.fitness.wvalue)
-        logging.info("Best : {:.2f} - {}".format(best_ind.fitness.wvalue, best_ind.fitness.values))
+        logging.info(
+            "Best : {:.2f} - {}".format(
+                best_ind.fitness.wvalue, best_ind.fitness.values
+            )
+        )
 
         # Select the next generation population
         pop = sorted(pop + offspring, key=lambda i: i.fitness.wvalue, reverse=True)
@@ -604,10 +729,10 @@ REFINERS = {
     "nsga": Refiner(fc_nsga_toolbox, nsga_ga),
     "naive": Refiner(fc_nsga_toolbox, naive_ga),
     "space_nsga": Refiner(fc_space_nsga_toolbox, space_nsga_ga),
-    "no_connectivity": Refiner(fc_no_connectivity_nsga_toolbox, space_nsga_ga)
+    "no_connectivity": Refiner(fc_no_connectivity_nsga_toolbox, space_nsga_ga),
 }
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     def apply():
         """
@@ -623,12 +748,20 @@ if __name__ == '__main__':
         logging.getLogger().setLevel(logging.INFO)
 
         plan_number = "B2E5L01"  # 062 006 020 061
-        solution = tools.cache.get_solution(plan_number, grid="002", seeder="directional_seeder",
-                                            solution_number=0)
+        solution = tools.cache.get_solution(
+            plan_number, grid="002", seeder="directional_seeder", solution_number=0
+        )
 
         if solution:
-            params = {"ngen": 100, "mu": 120, "cxpb": 0.5, "max_tries": 10, "elite": 0.1,
-                      "processes": 8, "pre_pass": False}
+            params = {
+                "ngen": 100,
+                "mu": 120,
+                "cxpb": 0.5,
+                "max_tries": 10,
+                "elite": 0.1,
+                "processes": 8,
+                "pre_pass": False,
+            }
 
             plan = solution.spec.plan
             plan.name = "original_" + plan_number
@@ -640,9 +773,10 @@ if __name__ == '__main__':
             if params.get("pre_pass", False):
                 REFINERS["no_connectivity"].apply_to(solution, params)
 
-            Corridor(corridor_rules=CORRIDOR_BUILDING_RULES["no_cut"]["corridor_rules"],
-                     growth_method=CORRIDOR_BUILDING_RULES["no_cut"]["growth_method"]
-                     ).apply_to(solution)
+            Corridor(
+                corridor_rules=CORRIDOR_BUILDING_RULES["no_cut"]["corridor_rules"],
+                growth_method=CORRIDOR_BUILDING_RULES["no_cut"]["growth_method"],
+            ).apply_to(solution)
 
             plan = solution.spec.plan
             plan.name = "Corridor_" + plan_number
@@ -656,8 +790,11 @@ if __name__ == '__main__':
             improved_plan.plot()
             # analyse found solution
             logging.info("Time elapsed: {}".format(end - start))
-            logging.info("Solution found : {} - {}".format(improved_plan.fitness.wvalue,
-                                                           improved_plan.fitness.values))
+            logging.info(
+                "Solution found : {} - {}".format(
+                    improved_plan.fitness.wvalue, improved_plan.fitness.values
+                )
+            )
 
             evaluation.check(improved_plan, solution)
 

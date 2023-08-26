@@ -13,7 +13,6 @@ from itertools import chain
 from operator import attrgetter, itemgetter
 from collections import defaultdict
 from typing import TYPE_CHECKING, Sequence
-
 if TYPE_CHECKING:
     from libs.refiner.core import Individual
 
