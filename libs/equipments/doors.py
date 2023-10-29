@@ -11,7 +11,7 @@ from shapely import geometry
 
 from libs.plan.plan import Space, Plan, Edge, Linear, LINEAR_CATEGORIES, SPACE_CATEGORIES, \
     LinearOrientation
-from libs.io.plot import plot_save
+from libs.read_write.plot import plot_save
 from libs.utils.graph import GraphNx
 
 from libs.utils.geometry import (
@@ -660,10 +660,10 @@ if __name__ == '__main__':
         :return:
         """
 
-        import libs.io.reader as reader
-        import libs.io.writer as writer
+        import libs.read_write.reader as reader
+        import libs.read_write.writer as writer
         from libs.space_planner.space_planner import SPACE_PLANNERS
-        from libs.io.reader import DEFAULT_PLANS_OUTPUT_FOLDER
+        from libs.read_write.reader import DEFAULT_PLANS_OUTPUT_FOLDER
 
         folder = DEFAULT_PLANS_OUTPUT_FOLDER
 

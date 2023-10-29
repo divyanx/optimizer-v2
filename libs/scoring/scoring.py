@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import shapely as sp
 from shapely.geometry import Point
 
-from libs.io.plot import plot_save
+from libs.read_write.plot import plot_save
 from libs.plan.category import SPACE_CATEGORIES
 from libs.plan.plan import Plan, Space, Face
 from libs.space_planner.circulation import Circulator, CostRules
@@ -895,7 +895,7 @@ def radar_chart(plan_score: float, score_components: Dict[str, float], solution_
 
 if __name__ == '__main__':
 
-    import libs.io.reader as reader
+    import libs.read_write.reader as reader
     from libs.modelers.grid import GRIDS
     from libs.modelers.seed import SEEDERS
     from libs.space_planner.space_planner import SPACE_PLANNERS

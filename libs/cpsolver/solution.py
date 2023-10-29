@@ -13,7 +13,7 @@ import math
 import uuid
 
 from libs.plan.category import SPACE_CATEGORIES
-import libs.io.reader as reader
+import libs.read_write.reader as reader
 from libs.modelers.grid import GRIDS
 from libs.plan.plan import Space
 from libs.cpsolver.solver import Solver, Cell

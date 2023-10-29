@@ -10,7 +10,7 @@ from libs.equipments.fitting import (fit_along_walls,
                                      fit_in_corners,
                                      fit_in_center)
 from libs.plan.category import SpaceCategory, SPACE_CATEGORIES, LinearCategory, LINEAR_CATEGORIES
-from libs.io.plot import plot_polygon
+from libs.read_write.plot import plot_polygon
 from libs.utils.geometry import (ccw_angle,
                                  unit,
                                  rotate,

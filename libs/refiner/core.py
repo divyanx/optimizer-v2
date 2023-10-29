@@ -278,7 +278,7 @@ class Individual(Plan):
         :param name:
         :return:
         """
-        from libs.io.plot import plot_save
+        from libs.read_write.plot import plot_save
 
         ax = super().plot(False, False, options, floor, name)
         msg = ""

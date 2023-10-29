@@ -6,7 +6,7 @@ import psutil
 
 from libs.executor.defs import ExecWrapper, TaskDefinition
 import libs.optimizer as opt
-import libs.io.plot as plt
+import libs.read_write.plot as plt
 from typing import List
 
 

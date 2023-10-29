@@ -2,7 +2,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath('../'))
-import libs.io.reader as reader
+import libs.read_write.reader as reader
 
 if __name__ == '__main__':
 

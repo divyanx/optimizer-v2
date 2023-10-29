@@ -29,7 +29,7 @@ from shapely.geometry import Polygon, LineString, LinearRing
 
 from libs.mesh.mesh import Mesh, Face, Edge, Vertex, MeshOps, MeshComponentType
 from libs.plan.category import LinearCategory, SpaceCategory, SPACE_CATEGORIES, LINEAR_CATEGORIES
-from libs.io.plot import plot_save, plot_edge, plot_polygon
+from libs.read_write.plot import plot_save, plot_edge, plot_polygon
 import libs.mesh.transformation as transformation
 from libs.specification.size import Size
 from libs.equipments.furniture import Furniture
@@ -3366,7 +3366,7 @@ class Plan:
 
 
 if __name__ == '__main__':
-    import libs.io.reader as reader
+    import libs.read_write.reader as reader
 
     logging.getLogger().setLevel(logging.DEBUG)
 

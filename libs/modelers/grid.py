@@ -7,10 +7,10 @@ from typing import Tuple, Sequence, Optional, TYPE_CHECKING
 import logging
 import matplotlib.pyplot as plt
 
-from libs.io import reader
+from libs.read_write import reader
 from libs.operators.mutation import MUTATIONS, MUTATION_FACTORIES
 from libs.operators.selector import SELECTORS, SELECTOR_FACTORIES
-from libs.io.plot import Plot
+from libs.read_write.plot import Plot
 
 
 if TYPE_CHECKING:

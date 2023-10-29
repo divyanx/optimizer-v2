@@ -4,11 +4,11 @@ Seeder Module Tests
 """
 import pytest
 
-from libs.io import reader
+from libs.read_write import reader
 from libs.modelers.seed import SEEDERS
 
 from libs.modelers.grid import GRIDS
-from libs.io.reader_test import BLUEPRINT_INPUT_FILES
+from libs.read_write.reader_test import BLUEPRINT_INPUT_FILES
 
 from libs.plan.plan import Plan
 from libs.plan.category import SPACE_CATEGORIES, LINEAR_CATEGORIES

@@ -1,5 +1,5 @@
 import json
-from libs.io import reader
+from libs.read_write import reader
 import libs.equipments.furniture as furniture
 from libs.equipments.doors import place_doors
 from libs.space_planner.solution import reference_plan_solution

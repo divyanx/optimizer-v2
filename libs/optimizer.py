@@ -10,8 +10,8 @@ import time
 import mimetypes
 import os
 
-from libs.io import reader
-from libs.io.writer import generate_output_dict, save_plan_as_json
+from libs.read_write import reader
+from libs.read_write.writer import generate_output_dict, save_plan_as_json
 from libs.modelers.grid import GRIDS
 from libs.modelers.seed import SEEDERS
 from libs.modelers.corridor import Corridor, CORRIDOR_BUILDING_RULES
@@ -23,7 +23,7 @@ from libs.utils.features import Features
 from libs.version import VERSION as OPTIMIZER_VERSION
 from libs.scoring.scoring import final_scoring
 from libs.space_planner.solution import spec_adaptation, reference_plan_solution
-import libs.io.plot
+import libs.read_write.plot
 import matplotlib.pyplot as plt
 import urllib
 import json
@@ -126,7 +126,7 @@ class ExecParams:
             params = {}
 
         refiner_params = {"ngen": 100, "mu": 120, "cxpb": 0.5, "max_tries": 10, "elite": 0.1,
-                          "processes": 8}
+                          "processes": 1}
 
         self.grid_type = params.get('grid_type', '002')
         self.seeder_type = params.get('seeder_type', 'directional_seeder')
@@ -172,6 +172,9 @@ class Optimizer:
         setup = reader.get_json_from_file(setup_file_name,
                                           reader.DEFAULT_SPECIFICATION_INPUT_FOLDER)
 
+        print("lot", lot)  # lot is the envelope
+        print("setup", setup) # setup is the specification
+
         return self.run(lot, setup, params, local_context)
 
     @staticmethod
@@ -209,14 +212,16 @@ class Optimizer:
 
         # OPT-119: If we don't have a local_context, we create one
         assert local_context, "Local context is required"
-
+        print("local_context", local_context)
         params = ExecParams(params_dict)
+
+        print("params", params)
 
         # output dir
         if local_context is not None and local_context.output_dir:
-            libs.io.plot.output_path = local_context.output_dir
-            if not os.path.exists(libs.io.plot.output_path):
-                os.makedirs(libs.io.plot.output_path)
+            libs.read_write.plot.output_path = local_context.output_dir
+            if not os.path.exists(libs.read_write.plot.output_path):
+                os.makedirs(libs.read_write.plot.output_path)
 
         # times
         elapsed_times = {}
@@ -229,7 +234,7 @@ class Optimizer:
         plan = reader.create_plan_from_data(lot)
         elapsed_times["reader"] = time.process_time() - t0_reader
         logging.info("Lot read in %f", elapsed_times["reader"])
-
+        print("plan", plan)
         # reading setup
         logging.info("Read setup")
         t0_setup = time.process_time()
@@ -253,7 +258,7 @@ class Optimizer:
         if params.do_plot:
             plan.plot(name="grid")
         if params.save_ll_bp:
-            save_plan_as_json(plan.serialize(), "grid", libs.io.plot.output_path)
+            save_plan_as_json(plan.serialize(), "grid", libs.read_write.plot.output_path)
         elapsed_times["grid"] = time.process_time() - t0_grid
         logging.info("Grid achieved in %f", elapsed_times["grid"])
 
@@ -264,7 +269,7 @@ class Optimizer:
         if params.do_plot:
             plan.plot(name="seeder")
         if params.save_ll_bp:
-            save_plan_as_json(plan.serialize(), "seeder", libs.io.plot.output_path)
+            save_plan_as_json(plan.serialize(), "seeder", libs.read_write.plot.output_path)
         elapsed_times["seeder"] = time.process_time() - t0_seeder
         logging.info("Seeder achieved in %f", elapsed_times["seeder"])
 
@@ -300,10 +305,11 @@ class Optimizer:
                         sol.spec.plan.plot(name=f"corridor sol {i + 1}")
                     if params.save_ll_bp:
                         save_plan_as_json(sol.spec.plan.serialize(), f"corridor sol {i + 1}",
-                                          libs.io.plot.output_path)
+                                          libs.read_write.plot.output_path)
         elapsed_times["corridor"] = time.process_time() - t0_corridor
         logging.info("Corridor achieved in %f", elapsed_times["corridor"])
 
+        print("Line 312 ##--##")
         # refiner
         t0_refiner = time.process_time()
         if params.do_refiner:
@@ -316,7 +322,7 @@ class Optimizer:
                         sol.spec.plan.plot(name=f"refiner sol {i + 1}")
                     if params.save_ll_bp:
                         save_plan_as_json(sol.spec.plan.serialize(), f"refiner sol {i + 1}",
-                                          libs.io.plot.output_path)
+                                          libs.read_write.plot.output_path)
         elapsed_times["refiner"] = time.process_time() - t0_refiner
         logging.info("Refiner achieved in %f", elapsed_times["refiner"])
 
@@ -343,7 +349,7 @@ class Optimizer:
                         sol.spec.plan.plot(name=f"garnisher sol {i+1}")
                     if params.save_ll_bp:
                         save_plan_as_json(sol.spec.plan.serialize(), f"garnisher sol {i+1}",
-                                          libs.io.plot.output_path)
+                                          libs.read_write.plot.output_path)
         elapsed_times["garnisher"] = time.process_time() - t0_garnisher
         logging.info("Garnisher achieved in %f", elapsed_times["garnisher"])
 
@@ -385,7 +391,7 @@ class Optimizer:
                      elapsed_times["totalReal"])
 
         # OPT-114: This is how we will transmit the generated files
-        local_context.files = Optimizer.get_generated_files(libs.io.plot.output_path)
+        local_context.files = Optimizer.get_generated_files(libs.read_write.plot.output_path)
 
         return Response(
             solutions,
@@ -404,17 +410,19 @@ if __name__ == '__main__':
         logging.getLogger().setLevel(logging.INFO)
         executor = Optimizer()
         response = executor.run_from_file_names(
-            "045.json",
-            "045_setup0.json",
+            "001.json",
+            "001_setup0.json",
             {
                 "grid_type": "002",
                 "seeder_type": "directional_seeder",
                 "do_plot": True,
                 "do_corridor": True,
                 "do_refiner": True,
-                "max_nb_solutions": 3,
-                "do_door": False,
-                "do_final_scoring": True
+                "max_nb_solutions": 16,
+                "do_door": True,
+                "do_final_scoring": True,
+                "save_ll_bp": True,
+
             },
             local_context=LocalContext()
         )

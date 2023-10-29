@@ -13,7 +13,7 @@ from libs.space_planner.solution import SolutionsCollector, Solution
 from libs.plan.plan import Plan, Space
 from libs.space_planner.constraints_manager import ConstraintsManager
 from libs.plan.category import SPACE_CATEGORIES
-import libs.io.writer as writer
+import libs.read_write.writer as writer
 from copy import deepcopy
 
 from sklearn.cluster import DBSCAN
@@ -265,7 +265,7 @@ def solution_distance(sol1: [], sol2: []) -> float:
 
 
 if __name__ == '__main__':
-    import libs.io.reader as reader
+    import libs.read_write.reader as reader
     from libs.modelers.grid import GRIDS
     from libs.modelers.seed import SEEDERS
     # from resources import DEFAULT_BLUEPRINT_INPUT_FOLDER

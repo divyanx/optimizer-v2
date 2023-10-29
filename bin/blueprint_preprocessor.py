@@ -5,7 +5,7 @@ Blueprint preprocessor
 from __future__ import print_function
 import os
 from libs.plan.plan import Plan, Edge, Space
-import libs.io.reader as reader
+import libs.read_write.reader as reader
 from libs.modelers.grid import GRIDS
 from libs.modelers.seed import SEEDERS
 from libs.optimizer import ExecParams

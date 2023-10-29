@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--module", help="choose launched module",
-                        default="grid")
+                        default="")
     args = parser.parse_args()
     module = args.module
 

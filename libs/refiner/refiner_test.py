@@ -7,7 +7,7 @@ import pytest
 import time
 
 from libs.refiner.refiner import REFINERS
-from libs.io import reader_test
+from libs.read_write import reader_test
 
 import tools.cache
 

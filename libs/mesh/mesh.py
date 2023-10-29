@@ -31,7 +31,7 @@ from libs.utils.geometry import (
     distance,
     project_point_on_segment
 )
-from libs.io.plot import random_color, make_arrow, plot_polygon, plot_edge, plot_save
+from libs.read_write.plot import random_color, make_arrow, plot_polygon, plot_edge, plot_save
 
 # MODULE CONSTANTS
 

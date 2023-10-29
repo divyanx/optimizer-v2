@@ -8,7 +8,7 @@ from libs.space_planner.solution import Solution
 from libs.space_planner.circulation import Circulator, CostRules
 from libs.specification.specification import Specification
 from libs.plan.category import SPACE_CATEGORIES
-from libs.io.plot import Plot
+from libs.read_write.plot import Plot
 from libs.utils.geometry import (
     ccw_angle,
     pseudo_equal,

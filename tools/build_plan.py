@@ -1,4 +1,4 @@
-import libs.io.reader as reader
+import libs.read_write.reader as reader
 from libs.modelers.seed import Seeder, GROWTH_METHODS, FILL_METHODS
 from libs.space_planner.space_planner import SpacePlanner
 from libs.operators.selector import SELECTORS

@@ -13,7 +13,7 @@ import math
 from enum import Enum
 from typing import TYPE_CHECKING, Dict, List, Tuple, Any, Type, Union, Optional, Callable, Set
 
-from libs.io.plot import plot_save
+from libs.read_write.plot import plot_save
 from libs.utils.graph import GraphNx, EdgeGraph
 from libs.plan.category import LINEAR_CATEGORIES
 from libs.utils.geometry import parallel, opposite_vector, move_point
@@ -768,7 +768,7 @@ class PathCalculator:
 
 
 if __name__ == '__main__':
-    import libs.io.reader as reader
+    import libs.read_write.reader as reader
     from libs.plan.plan import Plan
     from libs.modelers.seed import SEEDERS
     from libs.modelers.grid import GRIDS

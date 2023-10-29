@@ -85,8 +85,8 @@ def test_serialization():
     Test a mesh serialization
     :return:
     """
-    import libs.io.writer as writer
-    import libs.io.reader as reader
+    import libs.read_write.writer as writer
+    import libs.read_write.reader as reader
 
     perimeter = [(0, 0), (200, 0), (200, 200), (0, 200)]
     mesh = Mesh().from_boundary(perimeter)

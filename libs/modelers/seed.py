@@ -22,7 +22,7 @@ import copy
 import matplotlib.pyplot as plt
 
 from libs.plan.plan import Space, PlanComponent, Plan, Linear
-from libs.io.plot import Plot
+from libs.read_write.plot import Plot
 from libs.specification.size import Size
 from libs.operators.action import Action
 
@@ -1079,8 +1079,8 @@ if __name__ == '__main__':
         """
         from libs.modelers.grid import GRIDS
         from libs.operators.selector import SELECTORS
-        import libs.io.writer as writer
-        import libs.io.reader as reader
+        import libs.read_write.writer as writer
+        import libs.read_write.reader as reader
 
         import matplotlib
         matplotlib.use("TkAgg")

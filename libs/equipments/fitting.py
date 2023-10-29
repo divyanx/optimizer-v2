@@ -164,7 +164,7 @@ if __name__ == '__main__':
     import logging
     from typing import Dict, Tuple
 
-    from libs.io import reader
+    from libs.read_write import reader
     from libs.specification.specification import Specification
     from libs.plan.plan import Space, Plan
     from libs.space_planner.solution import reference_plan_solution
@@ -176,7 +176,7 @@ if __name__ == '__main__':
         """
         Load plan from cache
         """
-        from libs.io.reader import DEFAULT_PLANS_OUTPUT_FOLDER
+        from libs.read_write.reader import DEFAULT_PLANS_OUTPUT_FOLDER
 
         folder = DEFAULT_PLANS_OUTPUT_FOLDER
         spec_file_name = input_file[:-5] + "_setup0"
